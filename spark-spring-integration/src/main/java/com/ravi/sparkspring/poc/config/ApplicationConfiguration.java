@@ -50,7 +50,7 @@ public class ApplicationConfiguration {
         return SparkSession
                 .builder()
                 .sparkContext(javaSparkContext().sc())
-                .appName("Java Spark SQL basic example")
+                .appName("Java Spark Ravi")
                 .getOrCreate();
     }
 
