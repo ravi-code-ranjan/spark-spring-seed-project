@@ -4,11 +4,11 @@ import org.apache.spark.SparkConf;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-@Configuration
+/*@Configuration*/
 public class TestConfiguration {
 
-	@Bean
+/*	@Bean
 	public SparkConf sparkConf() {
 		return new SparkConf(false);
-	}
+	}*/
 }

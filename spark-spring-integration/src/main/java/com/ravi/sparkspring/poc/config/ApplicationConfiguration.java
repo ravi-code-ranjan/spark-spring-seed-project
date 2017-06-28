@@ -2,6 +2,7 @@ package com.ravi.sparkspring.poc.config;
 
 import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaSparkContext;
+import org.apache.spark.sql.SparkSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -17,7 +18,7 @@ public class ApplicationConfiguration {
 	@Autowired
     private Environment env;
 
-    @Value("${app.name:jigsaw}")
+    @Value("${app.name}")
     private String appName;
 
     @Value("${spark.home}")
@@ -39,6 +40,15 @@ public class ApplicationConfiguration {
     @Bean
     public JavaSparkContext javaSparkContext() {
         return new JavaSparkContext(sparkConf());
+    }
+
+    @Bean
+    public SparkSession sparkSession() {
+        return SparkSession
+                .builder()
+                .sparkContext(javaSparkContext().sc())
+                .appName("Java Spark SQL basic example")
+                .getOrCreate();
     }
 
     @Bean

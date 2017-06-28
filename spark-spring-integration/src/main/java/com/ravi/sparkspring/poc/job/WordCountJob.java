@@ -1,53 +1,44 @@
 package com.ravi.sparkspring.poc.job;
 
-import org.apache.spark.api.java.JavaPairRDD;
-import org.apache.spark.api.java.JavaRDD;
-import org.apache.spark.api.java.JavaSparkContext;
+import static org.apache.spark.sql.functions.col;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
+import org.apache.spark.sql.Dataset;
+import org.apache.spark.sql.RelationalGroupedDataset;
+import org.apache.spark.sql.Row;
+import org.apache.spark.sql.SparkSession;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import scala.Tuple2;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
+import com.ravi.sparkspring.poc.beans.Count;
+import com.ravi.sparkspring.poc.beans.Word;
 
 @Component
 public class WordCountJob {
 
-	@Autowired
-	private JavaSparkContext javaSparkContext;
+    @Autowired
+    private SparkSession sparkSession;
 
-	@Value("${input.file}")
-	private String inputFile;
+    public List<Count> count() {
+        String input = "hello world hello hello hello";
+        String[] _words = input.split(" ");
+        List<Word> words = Arrays.stream(_words).map(Word::new).collect(Collectors.toList());
+        Dataset<Row> dataFrame = sparkSession.createDataFrame(words, Word.class);
+        dataFrame.show();
+        //StructType structType = dataFrame.schema();
 
-	@Value("${input.threshold}")
-	private int threshold;
-
-	public void count() {
-/*
-		JavaRDD<Object> tokenized = javaSparkContext.textFile(inputFile)
-				.flatMap((s1) -> Arrays.asList(s1.split(" ")));
-
-		// count the occurrence of each word
-		JavaPairRDD<String, Integer> counts = tokenized.mapToPair(
-				s -> new Tuple2<>(s, 1)).reduceByKey((i1, i2) -> i1 + i2);
-
-		// filter out words with less than threshold occurrences
-		JavaPairRDD<String, Integer> filtered = counts
-				.filter(tup -> tup._2() >= threshold);
-
-		// count characters
-		JavaPairRDD<Character, Integer> charCounts = filtered.flatMap(s -> {
-			Collection<Character> chars = new ArrayList<>(s._1().length());
-			for (char c : s._1().toCharArray()) {
-				chars.add(c);
-			}
-			return chars;
-		}).mapToPair(c -> new Tuple2<>(c, 1)).reduceByKey((i1, i2) -> i1 + i2);
-
-		System.out.println(charCounts.collect());*/
-		System.out.println("hello");
-	}
+        RelationalGroupedDataset groupedDataset = dataFrame.groupBy(col("word"));
+        groupedDataset.count().show();
+        List<Row> rows = groupedDataset.count().collectAsList();//JavaConversions.asScalaBuffer(words)).count();
+        return rows.stream().map(new Function<Row, Count>() {
+            @Override
+            public Count apply(Row row) {
+                return new Count(row.getString(0), row.getLong(1));
+            }
+        }).collect(Collectors.toList());
+    }
 }
