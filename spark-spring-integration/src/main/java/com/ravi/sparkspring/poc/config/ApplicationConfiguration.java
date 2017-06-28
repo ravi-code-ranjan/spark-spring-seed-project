@@ -26,6 +26,9 @@ public class ApplicationConfiguration {
 
     @Value("${master.uri:local}")
     private String masterUri;
+    
+    @Value("${app.word}")
+    private String inputString;
 
     @Bean
     public SparkConf sparkConf() {
@@ -55,4 +58,8 @@ public class ApplicationConfiguration {
     public static PropertySourcesPlaceholderConfigurer propertySourcesPlaceholderConfigurer() {
         return new PropertySourcesPlaceholderConfigurer();
 }
+
+	public String getInputString() {
+		return inputString;
+	}
 }

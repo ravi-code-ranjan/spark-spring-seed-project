@@ -16,15 +16,20 @@ import org.springframework.stereotype.Component;
 
 import com.ravi.sparkspring.poc.beans.Count;
 import com.ravi.sparkspring.poc.beans.Word;
+import com.ravi.sparkspring.poc.config.ApplicationConfiguration;
 
 @Component
 public class WordCountJob {
 
     @Autowired
     private SparkSession sparkSession;
+    
+    @Autowired
+    ApplicationConfiguration applicationConfiguration;
 
     public List<Count> count() {
-        String input = "hello world hello hello hello";
+        //String input = "hello world hello hello hello";
+        String input = applicationConfiguration.getInputString();
         String[] _words = input.split(" ");
         List<Word> words = Arrays.stream(_words).map(Word::new).collect(Collectors.toList());
         Dataset<Row> dataFrame = sparkSession.createDataFrame(words, Word.class);
